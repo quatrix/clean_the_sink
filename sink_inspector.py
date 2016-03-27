@@ -4,6 +4,8 @@ from skimage.io import imread
 from skimage import color
 from itertools import chain
 
+from skimage.exposure import adjust_gamma
+
 
 def get_sink(f):
     sink = imread(f, True)
@@ -14,7 +16,8 @@ def get_sink(f):
 
 
 def get_edges(sink):
-    edges = canny(sink, sigma=0.1)
+    sink = adjust_gamma(sink, 1, 2)
+    edges = canny(sink, sigma=0.01)
     return sum([int(i) for i in chain(*edges)])
 
 
@@ -23,19 +26,6 @@ def get_dirtiness(f):
     return sum(get_edges(part) for part in sink_parts)
 
 if __name__ == '__main__':
-    files = [
-        "sample_files/half_dirty.jpg",
-        "sample_files/half_dirty_partially_dark.jpg",
-        "sample_files/washing_dishes.jpg",
-        "sample_files/watering_plants.jpg",
-        "sample_files/2d_dl.jpg",
-        "sample_files/3d_dl.jpg",
-        "sample_files/4d_dl.jpg",
-        "sample_files/lots_dl.jpg",
-        "sample_files/one_glass_dl.jpg",
-        "sample_files/clean_dl.jpg",
-        "sample_files/clean_ll.jpg",
-    ]
 
     for f in files:
         print("{} -> {}".format(f, get_dirtiness(f)))
