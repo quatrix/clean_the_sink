@@ -34,6 +34,7 @@ if __name__ == '__main__':
         "sample_files/lots_dl.jpg",
         "sample_files/one_glass_dl.jpg",
         "sample_files/clean_dl.jpg",
+        "sample_files/clean_ll.jpg",
     ]
 
     for f in files:
