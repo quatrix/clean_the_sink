@@ -43,7 +43,6 @@ def results():
     } 
     
     pprint(res)
-    assert 0
 
     return res
 

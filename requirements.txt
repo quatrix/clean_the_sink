@@ -18,3 +18,4 @@ six==1.10.0
 statsd==3.2.1
 toolz==0.7.4
 tornado==4.3
+pytest==2.9.1
