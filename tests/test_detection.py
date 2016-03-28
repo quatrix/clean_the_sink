@@ -25,6 +25,7 @@ dirty_sinks = [
 clean_sinks = [
     "clean_dl",
     "clean_ll",
+    "clean2_ll",
 ]
 
 

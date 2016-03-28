@@ -17,7 +17,7 @@ def count_circules(sink):
 
     edges = canny(
         sink,
-        sigma=2,
+        sigma=1,
         low_threshold=0.1,
         high_threshold=0.7
     )
@@ -70,6 +70,8 @@ def count_circules(sink):
         except IndexError:
             continue
 
+    #draw_res(sink, edges)
+    #print(len(drawn))
     return len(drawn)
 
 def count_edges(sink):
@@ -111,6 +113,7 @@ if __name__ == '__main__':
         "watering_plants",
         "clean_dl",
         "clean_ll",
+        "clean2_ll",
     ]
 
     for sink in sinks:
