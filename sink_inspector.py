@@ -94,8 +94,8 @@ def count_dishes(sink):
         except IndexError:
             continue
 
-    #draw_res(sink, edges)
-    #print(drawn)
+    draw_res(sink, edges)
+    print(drawn)
     return len(drawn)
 
 def count_edges(sink):
@@ -117,20 +117,19 @@ def _count_edges(sink):
 
 def get_sink(f):
     sink = imread(f, True)
-    """
-    sink = exposure.adjust_gamma(sink, 2)
-    sink = exposure.adjust_log(sink, 1)
-    sink = exposure.adjust_sigmoid(sink, 0.1)
-    """
+    
+    pmin, pmax = np.percentile(sink, (15, 98))
 
-    p2, p98 = np.percentile(sink, (10, 98))
-    sink = exposure.rescale_intensity(sink, in_range=(p2, p98))
+    sink = exposure.rescale_intensity(
+        sink,
+        in_range=(pmin, pmax)
+    )
 
     # Equalization
     sink = exposure.equalize_hist(sink)
 
     # Adaptive Equalization
-    sink = exposure.equalize_adapthist(sink, clip_limit=0.03)
+    sink = exposure.equalize_adapthist(sink, clip_limit=0.04)
 
 
     return sink
@@ -157,10 +156,11 @@ if __name__ == '__main__':
         #"watering_plants",
         #"clean_dl",
         #"clean2_dl",
-        "clean_ll",
+        #"clean_ll",
         #"clean2_ll",
         #"2d_2g_dl_0",
         #"2d_2g_dl_1",
+        #"2d_2g_dl_2",
     ]
 
     for sink in sinks:

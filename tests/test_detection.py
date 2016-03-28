@@ -119,11 +119,12 @@ sink_to_dishes = [
     ("clean2_dl", 0),
     ("one_glass_dl", 1),
     ("one_glass_ll", 1),
-    ("2d_dl", 2),
+    ("2d_dl", 1),
     ("3d_dl", 3),
     ("4d_dl", 4),
-    ("2d_2g_dl_0", 3),
-    ("2d_2g_dl_1", 3),
+    ("2d_2g_dl_0", 4),
+    ("2d_2g_dl_1", 4),
+    ("2d_2g_dl_2", 4),
 ]
 
 @pytest.mark.parametrize("expected", sink_to_dishes)
