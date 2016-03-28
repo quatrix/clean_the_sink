@@ -28,6 +28,7 @@ clean_sinks = [
     "clean_dl",
     "clean_ll",
     "clean2_ll",
+    "clean2_dl",
 ]
 
 
@@ -88,6 +89,7 @@ sink_holes = [
     (82, 80, 7),
     (84, 85, 12),
     (87, 74, 14),
+    (88, 73, 15),
 ]
 
 @pytest.mark.parametrize("sink_hole", sink_holes)
@@ -110,7 +112,22 @@ fossets = [
 def test_is_foset(fosset):
     assert is_fosset(*fosset)
 
-@pytest.mark.parametrize("sink", clean_sinks)
-def test_clean_sink_has_no_dishes(sink):
+sink_to_dishes = [
+    ("clean_dl", 0),
+    ("clean_ll", 0),
+    ("clean2_ll", 0),
+    ("clean2_dl", 0),
+    ("one_glass_dl", 1),
+    ("one_glass_ll", 1),
+    ("2d_dl", 2),
+    ("3d_dl", 3),
+    ("4d_dl", 4),
+    ("2d_2g_dl_0", 3),
+    ("2d_2g_dl_1", 3),
+]
+
+@pytest.mark.parametrize("expected", sink_to_dishes)
+def test_expected_number_of_dishes(expected):
+    sink, dishes = expected
     sink = get_sink(get_full_path(sink))
-    assert count_dishes(sink) == 0
+    assert count_dishes(sink) == dishes

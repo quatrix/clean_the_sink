@@ -4,7 +4,7 @@ from skimage.io import imread
 from skimage import color
 from itertools import chain
 from utils import draw_res
-from skimage.exposure import adjust_gamma
+from skimage import exposure 
 from skimage.draw import circle_perimeter
 from skimage import color
 import math
@@ -29,7 +29,7 @@ def is_fosset(x, y, radius):
 def is_sink_hole(x, y, radius):
     dx, dy = 87, 74
 
-    rd = 15 > radius > 5
+    rd = 16 > radius > 5
     dist = distance(x, dx, y, dy)
     
     return dist <= 12 and rd
@@ -39,9 +39,9 @@ def count_dishes(sink):
 
     edges = canny(
         sink,
-        sigma=0,
+        sigma=1,
         low_threshold=0.1,
-        high_threshold=0.2
+        high_threshold=0.3
     )
 
     # Detect two radii
@@ -94,8 +94,8 @@ def count_dishes(sink):
         except IndexError:
             continue
 
-    draw_res(sink, edges)
-    print(drawn)
+    #draw_res(sink, edges)
+    #print(drawn)
     return len(drawn)
 
 def count_edges(sink):
@@ -111,12 +111,30 @@ def count_edges(sink):
 
 
 def _count_edges(sink):
-    edges = canny(sink, sigma=0.01)
+    edges = canny(sink, sigma=1)
     return sum([int(i) for i in chain(*edges)])
 
 
 def get_sink(f):
-    return adjust_gamma(imread(f, True), 1, 1.5)
+    sink = imread(f, True)
+    """
+    sink = exposure.adjust_gamma(sink, 2)
+    sink = exposure.adjust_log(sink, 1)
+    sink = exposure.adjust_sigmoid(sink, 0.1)
+    """
+
+    p2, p98 = np.percentile(sink, (10, 98))
+    sink = exposure.rescale_intensity(sink, in_range=(p2, p98))
+
+    # Equalization
+    sink = exposure.equalize_hist(sink)
+
+    # Adaptive Equalization
+    sink = exposure.equalize_adapthist(sink, clip_limit=0.03)
+
+
+    return sink
+
 
 def get_dirtiness(f):
     sink = get_sink(f)
@@ -128,7 +146,7 @@ def get_dirtiness(f):
 if __name__ == '__main__':
     sinks = [
         #"one_glass_dl",
-        #"2d_dl",
+        "2d_dl",
         #"3d_dl",
         #"4d_dl",
         #"lots_dl",
@@ -137,10 +155,10 @@ if __name__ == '__main__':
         #"half_dirty",
         #"washing_dishes",
         #"watering_plants",
-        "clean_dl",
-        "clean2_dl",
+        #"clean_dl",
+        #"clean2_dl",
         "clean_ll",
-        "clean2_ll",
+        #"clean2_ll",
         #"2d_2g_dl_0",
         #"2d_2g_dl_1",
     ]
