@@ -12,8 +12,30 @@ import math
 from skimage.transform import hough_circle
 import numpy as np
 
+def distance(x1, x2, y1, y2):
+    return math.hypot(
+        x1 - x2,
+        y1 - y2,
+    )
+
+def is_fosset(x, y, radius):
+    a = 30 > x > 0
+    b = 80 > y > 60
+    c = 13 >= radius >= 9
+    
+    return a and b and c
+
+
+def is_sink_hole(x, y, radius):
+    dx, dy, r = 87, 71, 11
+
+    rd = abs(radius - r)
+    dist = distance(x, dx, y, dy)
+
+    return dist <= 6 and rd <= 2
+
 def count_circules(sink):
-    sink = sink[195:330, 253:350]
+    sink = sink[160:330, 253:350]
 
     edges = canny(
         sink,
@@ -43,26 +65,28 @@ def count_circules(sink):
     for idx in np.argsort(accums)[::-1][:5]:
         center_x, center_y = centers[idx]
         radius = radii[idx]
+
         
         # removing circules that are 
         # too close to each other
         found = False
         for d in drawn:
-            dx, dy = d
+            dx, dy, dr = d
 
-            distance = math.hypot(
-                center_x - dx,
-                center_y - dy
-            )
-
-            if distance < 20:
+            if distance(center_x, dx, center_y, dy) < 20: 
                 found = True
                 break
 
         if found:
             continue
 
-        drawn.append((center_x, center_y))
+        if is_sink_hole(center_x, center_y, radius):
+            continue
+
+        if is_fosset(center_x, center_y, radius):
+            continue
+
+        drawn.append((center_x, center_y, radius))
 
         cx, cy = circle_perimeter(center_y, center_x, radius)
         try:
@@ -71,7 +95,7 @@ def count_circules(sink):
             continue
 
     #draw_res(sink, edges)
-    #print(len(drawn))
+    #print(drawn)
     return len(drawn)
 
 def count_edges(sink):
@@ -112,6 +136,7 @@ if __name__ == '__main__':
         "washing_dishes",
         "watering_plants",
         "clean_dl",
+        "clean2_dl",
         "clean_ll",
         "clean2_ll",
     ]

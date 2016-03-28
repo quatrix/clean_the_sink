@@ -71,3 +71,33 @@ def test_incremental_dirtiness(results, pair):
     )
 
     assert results[pair[0]] < results[pair[1]], e
+
+
+sink_holes = [
+    (87, 71, 11),
+    (86, 73, 12),
+    (86, 73, 13),
+    (84, 75, 12),
+    (84, 73, 12),
+    (87, 77, 13),
+]
+
+@pytest.mark.parametrize("sink_hole", sink_holes)
+def test_is_sink_hole(sink_hole):
+    assert is_sink_hole(*sink_hole)
+
+
+fossets = [
+    (19, 71, 10),
+    (19, 72, 10),
+    (17, 69, 10),
+    (16, 69, 11),
+    (15, 68, 12),
+    (18, 71, 11),
+    (14, 68, 13),
+]
+
+
+@pytest.mark.parametrize("fosset", fossets)
+def test_is_foset(fosset):
+    assert is_fosset(*fosset)
