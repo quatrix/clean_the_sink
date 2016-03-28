@@ -21,18 +21,18 @@ def distance(x1, x2, y1, y2):
 def is_fosset(x, y, radius):
     a = 30 > x > 0
     b = 80 > y > 60
-    c = 13 >= radius >= 9
-    
+    c = 13 >= radius >= 6
+
     return a and b and c
 
 
 def is_sink_hole(x, y, radius):
-    dx, dy, r = 87, 71, 11
+    dx, dy = 87, 71
 
-    rd = abs(radius - r)
+    rd = 14 > radius > 5
     dist = distance(x, dx, y, dy)
 
-    return dist <= 6 and rd <= 2
+    return dist <= 7 and rd
 
 def count_circules(sink):
     sink = sink[160:330, 253:350]
@@ -45,7 +45,7 @@ def count_circules(sink):
     )
 
     # Detect two radii
-    hough_radii = np.arange(10, 100, 1)
+    hough_radii = np.arange(7, 60, 1)
     hough_res = hough_circle(edges, hough_radii)
     centers = []
     accums = []
@@ -62,7 +62,7 @@ def count_circules(sink):
 
     sink = color.gray2rgb(sink)
 
-    for idx in np.argsort(accums)[::-1][:5]:
+    for idx in np.argsort(accums)[::-1][:10]:
         center_x, center_y = centers[idx]
         radius = radii[idx]
 
@@ -117,7 +117,7 @@ def _count_edges(sink):
 
 def get_dirtiness(f):
     sink = imread(f, True)
-    sink = adjust_gamma(sink, 1, 2)
+    sink = adjust_gamma(sink, 1, 1.5)
     circules = count_circules(sink) + 1
     edges = count_edges(sink)
     return edges * circules

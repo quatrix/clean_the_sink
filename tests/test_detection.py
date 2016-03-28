@@ -80,6 +80,7 @@ sink_holes = [
     (84, 75, 12),
     (84, 73, 12),
     (87, 77, 13),
+    (83, 76, 8),
 ]
 
 @pytest.mark.parametrize("sink_hole", sink_holes)
