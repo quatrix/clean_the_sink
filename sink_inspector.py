@@ -27,25 +27,25 @@ def is_fosset(x, y, radius):
 
 
 def is_sink_hole(x, y, radius):
-    dx, dy = 87, 71
+    dx, dy = 87, 74
 
-    rd = 14 > radius > 5
+    rd = 15 > radius > 5
     dist = distance(x, dx, y, dy)
+    
+    return dist <= 12 and rd
 
-    return dist <= 7 and rd
-
-def count_circules(sink):
-    sink = sink[160:330, 253:350]
+def count_dishes(sink):
+    sink = sink[160:330, 250:350]
 
     edges = canny(
         sink,
-        sigma=1,
+        sigma=0,
         low_threshold=0.1,
-        high_threshold=0.7
+        high_threshold=0.2
     )
 
     # Detect two radii
-    hough_radii = np.arange(7, 60, 1)
+    hough_radii = np.arange(9, 60, 1)
     hough_res = hough_circle(edges, hough_radii)
     centers = []
     accums = []
@@ -94,8 +94,8 @@ def count_circules(sink):
         except IndexError:
             continue
 
-    #draw_res(sink, edges)
-    #print(drawn)
+    draw_res(sink, edges)
+    print(drawn)
     return len(drawn)
 
 def count_edges(sink):
@@ -115,30 +115,34 @@ def _count_edges(sink):
     return sum([int(i) for i in chain(*edges)])
 
 
+def get_sink(f):
+    return adjust_gamma(imread(f, True), 1, 1.5)
+
 def get_dirtiness(f):
-    sink = imread(f, True)
-    sink = adjust_gamma(sink, 1, 1.5)
-    circules = count_circules(sink) + 1
+    sink = get_sink(f)
+    dishes = count_dishes(sink) + 1
     edges = count_edges(sink)
-    return edges * circules
+    return edges * dishes
 
 
 if __name__ == '__main__':
     sinks = [
-        "one_glass_dl",
-        "2d_dl",
-        "3d_dl",
-        "4d_dl",
-        "lots_dl",
-        "one_glass_ll",
-        "half_dirty_partially_dark",
-        "half_dirty",
-        "washing_dishes",
-        "watering_plants",
+        #"one_glass_dl",
+        #"2d_dl",
+        #"3d_dl",
+        #"4d_dl",
+        #"lots_dl",
+        #"one_glass_ll",
+        #"half_dirty_partially_dark",
+        #"half_dirty",
+        #"washing_dishes",
+        #"watering_plants",
         "clean_dl",
         "clean2_dl",
         "clean_ll",
         "clean2_ll",
+        #"2d_2g_dl_0",
+        #"2d_2g_dl_1",
     ]
 
     for sink in sinks:

@@ -20,6 +20,8 @@ dirty_sinks = [
     "half_dirty",
     "washing_dishes",
     "watering_plants",
+    "2d_2g_dl_0",
+    "2d_2g_dl_1",
 ] + incrementaly_dirty_dl + incrementaly_dirty_ll
 
 clean_sinks = [
@@ -35,11 +37,13 @@ def pairwise(iterable):
     next(b, None)
     return izip(a, b)
 
+def get_full_path(f):
+    return 'tests/sample_files/' + f + '.jpg'
 
 @pytest.fixture(scope="module")
 def results():
     res = {
-        f: get_dirtiness('tests/sample_files/' + f + '.jpg')
+        f: get_dirtiness(get_full_path(f))
         for f in clean_sinks + dirty_sinks
     } 
     
@@ -74,13 +78,16 @@ def test_incremental_dirtiness(results, pair):
 
 
 sink_holes = [
-    (87, 71, 11),
-    (86, 73, 12),
-    (86, 73, 13),
+    (87, 74, 11),
+    (86, 76, 12),
+    (86, 76, 13),
+    (84, 78, 12),
     (84, 75, 12),
-    (84, 73, 12),
-    (87, 77, 13),
-    (83, 76, 8),
+    (87, 80, 13),
+    (83, 79, 8),
+    (82, 80, 7),
+    (84, 85, 12),
+    (87, 74, 14),
 ]
 
 @pytest.mark.parametrize("sink_hole", sink_holes)
@@ -89,16 +96,21 @@ def test_is_sink_hole(sink_hole):
 
 
 fossets = [
-    (19, 71, 10),
-    (19, 72, 10),
-    (17, 69, 10),
-    (16, 69, 11),
-    (15, 68, 12),
-    (18, 71, 11),
-    (14, 68, 13),
+    (19, 74, 10),
+    (19, 75, 10),
+    (17, 72, 10),
+    (16, 72, 11),
+    (15, 71, 12),
+    (18, 74, 11),
+    (14, 71, 13),
 ]
 
 
 @pytest.mark.parametrize("fosset", fossets)
 def test_is_foset(fosset):
     assert is_fosset(*fosset)
+
+@pytest.mark.parametrize("sink", clean_sinks)
+def test_clean_sink_has_no_dishes(sink):
+    sink = get_sink(get_full_path(sink))
+    assert count_dishes(sink) == 0
