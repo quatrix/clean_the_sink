@@ -1,7 +1,7 @@
 from scipy.misc import imread
 from skimage.feature import canny, peak_local_max
 from skimage.io import imread
-from skimage import color
+from skimage import filters
 from itertools import chain
 from collections import namedtuple
 from utils import draw_res
@@ -17,38 +17,23 @@ Dirtiness = namedtuple(
     'Dirtiness', ['score', 'edges', 'dishes']
 )
 
+
 def distance(x1, x2, y1, y2):
     return math.hypot(
         x1 - x2,
         y1 - y2,
     )
 
-def is_fosset(x, y, radius):
-    a = 30 > x > 0
-    b = 80 > y > 60
-    c = 13 >= radius >= 6
 
-    return a and b and c
-
-
-def is_sink_hole(x, y, radius):
-    dx, dy = 87, 74
-
-    rd = 16 > radius > 5
-    dist = distance(x, dx, y, dy)
-    
-    return dist <= 12 and rd
-
-def _count_dishes(sink):
+def count_dishes(sink):
     edges = canny(
         sink,
-        sigma=1,
-        low_threshold=0.6,
-        high_threshold=0.4
+        sigma=2,
+        low_threshold=0.1,
+        high_threshold=0.5,
     )
-
-    # Detect two radii
-    hough_radii = np.arange(9, 60, 1)
+    
+    hough_radii = np.arange(25, 70, 1)
     hough_res = hough_circle(edges, hough_radii)
     centers = []
     accums = []
@@ -56,7 +41,6 @@ def _count_dishes(sink):
     drawn = []
 
     for radius, h in zip(hough_radii, hough_res):
-        # For each radius, extract two circles
         num_peaks = 2
         peaks = peak_local_max(h, num_peaks=num_peaks)
         centers.extend(peaks)
@@ -64,70 +48,50 @@ def _count_dishes(sink):
         radii.extend([radius] * num_peaks)
 
     sink = color.gray2rgb(sink)
+    hits = {}
 
-    for idx in np.argsort(accums)[::-1][:10]:
+    for idx in np.argsort(accums)[::-1]:
         center_x, center_y = centers[idx]
         radius = radii[idx]
 
-        
-        # removing circules that are 
-        # too close to each other
-        found = False
-        for d in drawn:
+        for d in hits.keys():
             dx, dy, dr = d
 
-            if distance(center_x, dx, center_y, dy) < 20: 
-                found = True
+            dt = distance(center_x, dx, center_y, dy)
+            
+            if dt <= 30 and abs(dr - radius) < 40:
+                hits[d] += 1
                 break
+        else:
+            hits[(center_x, center_y, radius)] = 1
 
-        if found:
-            continue
 
-        if is_sink_hole(center_x, center_y, radius):
-            continue
+    dishes = [k for k,v in hits.iteritems() if v > 5]
 
-        if is_fosset(center_x, center_y, radius):
-            continue
+    for dish in dishes:
+        center_x, center_y, radius = dish
 
         cx, cy = circle_perimeter(center_y, center_x, radius)
 
         try:
-            sink[cy, cx] = (220, 20, 20)
+            sink[cy, cx] = (220, 250, 20)
         except IndexError:
             continue
 
-        drawn.append((center_x, center_y, radius))
+    draw_res(sink, edges)
+    return len(dishes)
 
-    #draw_res(sink, edges)
-    #print(drawn)
-    return len(drawn)
 
 def count_edges(sink):
-    # cropping out parts of the sink
-    # we don't want to take into account
-    parts = sink[195:330, 253:350], \
-           sink[160:195, 253:315]
-
-    return sum(
-        _count_edges(part)
-        for part in parts
-    )
-
-
-def _count_edges(sink):
     edges = canny(sink, sigma=1)
     return sum([int(i) for i in chain(*edges)])
 
 
-def get_brightness(i):
-    all_pixels = list(chain(*i))
-    return sum(all_pixels) / len(all_pixels)
-
-def is_day_light(i):
-    return get_brightness(i) > 0.4
-
 def get_dirtiness(f):
     sink = get_sink(f)
+    sink = sink[60:450, 180:440]
+    sink = adjust_brightness(sink)
+
     dishes = count_dishes(sink)
     edges = count_edges(sink)
     score = edges * (dishes + 1)
@@ -135,37 +99,22 @@ def get_dirtiness(f):
     return Dirtiness(score, edges, dishes)
 
 
-def count_dishes(sink):
-    sink = sink[160:330, 250:350]
+def adjust_brightness(sink):
+    nsink = sink.copy()
+    pmin, pmax = np.percentile(nsink, (2, 98))
 
-    if is_day_light(sink):
-        pmins = [10, 15]
-    else:
-        pmins = [2]
+    nsink = exposure.rescale_intensity(
+        nsink,
+        in_range=(pmin, pmax)
+    )
 
-    return max([
-        _count_dishes(s) for s in 
-        adjust_brightness(sink, *pmins)
-    ])
+    nsink = exposure.equalize_hist(nsink)
 
-
-def adjust_brightness(sink, *pmins):
-    for pmin in pmins:
-        nsink = sink.copy()
-        pmin, pmax = np.percentile(nsink, (pmin, 98))
-
-        nsink = exposure.rescale_intensity(
-            nsink,
-            in_range=(pmin, pmax)
-        )
-
-        nsink = exposure.equalize_hist(nsink)
-
-        # Adaptive Equalization
-        yield exposure.equalize_adapthist(
-            nsink,
-            clip_limit=0.04
-        )
+    # Adaptive Equalization
+    return exposure.equalize_adapthist(
+        nsink,
+        clip_limit=0.01
+    )
 
 def get_sink(f):
     return imread(f, True)
@@ -174,24 +123,7 @@ def get_sink(f):
 
 if __name__ == '__main__':
     sinks = [
-        #"one_glass_dl",
-        "2d_dl",
-        #"3d_dl",
-        #"4d_dl",
-        #"lots_dl",
-        #"one_glass_ll",
-        #"half_dirty_partially_dark",
-        #"half_dirty",
-        #"washing_dishes",
-        #"watering_plants",
-        #"clean_dl",
-        #"clean2_dl",
-        #"clean_ll",
-        #"clean2_ll",
-        #"2d_2g_dl_0",
-        #"2d_2g_dl_1",
-        #"2d_2g_dl_2",
-        #"2d_2g_dl_3",
+        "4d_2g_dl_0",
     ]
 
     for sink in sinks:

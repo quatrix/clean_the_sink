@@ -95,40 +95,11 @@ sink_holes = [
 def test_is_sink_hole(sink_hole):
     assert is_sink_hole(*sink_hole)
 
-
-fossets = [
-    (19, 74, 10),
-    (19, 75, 10),
-    (17, 72, 10),
-    (16, 72, 11),
-    (15, 71, 12),
-    (18, 74, 11),
-    (14, 71, 13),
-]
-
-
-@pytest.mark.parametrize("fosset", fossets)
-def test_is_foset(fosset):
-    assert is_fosset(*fosset)
-
 sink_to_dishes = [
-    ("clean_dl", 0),
-    ("clean_ll", 0),
-    ("clean2_ll", 0),
-    ("clean2_dl", 0),
-    ("one_glass_dl", 1),
-    ("one_glass_ll", 1),
-    ("2d_dl", 3),
-    ("3d_dl", 3),
-    ("4d_dl", 5),
-    ("2d_2g_dl_0", 4),
-    ("2d_2g_dl_1", 4),
-    ("2d_2g_dl_2", 4),
-    ("2d_2g_dl_3", 4),
-    ("2d_2g_dl_4", 4),
+    ("4d_2g_dl_0", 5)
 ]
 
 @pytest.mark.parametrize("expected", sink_to_dishes)
 def test_expected_number_of_dishes(results, expected):
     sink, dishes = expected
-    assert results[sink].dishes == dishes
+    assert results[sink].dishes == dishes, sink
