@@ -34,14 +34,12 @@ def is_sink_hole(x, y, radius):
     
     return dist <= 12 and rd
 
-def count_dishes(sink):
-    sink = sink[160:330, 250:350]
-
+def _count_dishes(sink):
     edges = canny(
         sink,
         sigma=1,
-        low_threshold=0.1,
-        high_threshold=0.3
+        low_threshold=0.6,
+        high_threshold=0.4
     )
 
     # Detect two radii
@@ -86,13 +84,14 @@ def count_dishes(sink):
         if is_fosset(center_x, center_y, radius):
             continue
 
-        drawn.append((center_x, center_y, radius))
-
         cx, cy = circle_perimeter(center_y, center_x, radius)
+
         try:
             sink[cy, cx] = (220, 20, 20)
         except IndexError:
             continue
+
+        drawn.append((center_x, center_y, radius))
 
     draw_res(sink, edges)
     print(drawn)
@@ -115,31 +114,57 @@ def _count_edges(sink):
     return sum([int(i) for i in chain(*edges)])
 
 
-def get_sink(f):
-    sink = imread(f, True)
-    
-    pmin, pmax = np.percentile(sink, (15, 98))
+def get_brightness(i):
+    all_pixels = list(chain(*i))
+    return sum(all_pixels) / len(all_pixels)
 
-    sink = exposure.rescale_intensity(
-        sink,
-        in_range=(pmin, pmax)
-    )
-
-    # Equalization
-    sink = exposure.equalize_hist(sink)
-
-    # Adaptive Equalization
-    sink = exposure.equalize_adapthist(sink, clip_limit=0.04)
-
-
-    return sink
-
+def is_day_light(i):
+    return get_brightness(i) > 0.4
 
 def get_dirtiness(f):
     sink = get_sink(f)
-    dishes = count_dishes(sink) + 1
+    dishes = count_dishes(sink)
     edges = count_edges(sink)
-    return edges * dishes
+
+    print(dishes)
+    return edges * (dishes + 1)
+
+
+def count_dishes(sink):
+    sink = sink[160:330, 250:350]
+
+    if is_day_light(sink):
+        pmins = [10, 15]
+    else:
+        pmins = [2]
+
+    return max([
+        _count_dishes(s) for s in 
+        adjust_brightness(sink, *pmins)
+    ])
+
+
+def adjust_brightness(sink, *pmins):
+    for pmin in pmins:
+        nsink = sink.copy()
+        pmin, pmax = np.percentile(nsink, (pmin, 98))
+
+        nsink = exposure.rescale_intensity(
+            nsink,
+            in_range=(pmin, pmax)
+        )
+
+        nsink = exposure.equalize_hist(nsink)
+
+        # Adaptive Equalization
+        yield exposure.equalize_adapthist(
+            nsink,
+            clip_limit=0.04
+        )
+
+def get_sink(f):
+    return imread(f, True)
+
 
 
 if __name__ == '__main__':
@@ -161,6 +186,7 @@ if __name__ == '__main__':
         #"2d_2g_dl_0",
         #"2d_2g_dl_1",
         #"2d_2g_dl_2",
+        #"2d_2g_dl_3",
     ]
 
     for sink in sinks:
