@@ -19,8 +19,11 @@ class DirtySinkHandler(tornado.web.RequestHandler):
         dest = "/var/www/html/edisdead.com/sink.jpg"
         img.save(dest)
         dirtiness = get_dirtiness(dest)
-        logging.info('dirtiness: %d' ,dirtiness)
-        statsd_client.gauge('sink', dirtiness)
+        logging.info('dirtiness: %r' ,dirtiness)
+
+        statsd_client.gauge('sink.score', dirtiness.score)
+        statsd_client.gauge('sink.edges', dirtiness.edges)
+        statsd_client.gauge('sink.dishes', dirtiness.dishes)
 
 
 if __name__ == "__main__":

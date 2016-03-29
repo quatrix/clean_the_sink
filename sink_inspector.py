@@ -3,6 +3,7 @@ from skimage.feature import canny, peak_local_max
 from skimage.io import imread
 from skimage import color
 from itertools import chain
+from collections import namedtuple
 from utils import draw_res
 from skimage import exposure 
 from skimage.draw import circle_perimeter
@@ -11,6 +12,10 @@ import math
 
 from skimage.transform import hough_circle
 import numpy as np
+
+Dirtiness = namedtuple(
+    'Dirtiness', ['score', 'edges', 'dishes']
+)
 
 def distance(x1, x2, y1, y2):
     return math.hypot(
@@ -93,8 +98,8 @@ def _count_dishes(sink):
 
         drawn.append((center_x, center_y, radius))
 
-    draw_res(sink, edges)
-    print(drawn)
+    #draw_res(sink, edges)
+    #print(drawn)
     return len(drawn)
 
 def count_edges(sink):
@@ -125,9 +130,9 @@ def get_dirtiness(f):
     sink = get_sink(f)
     dishes = count_dishes(sink)
     edges = count_edges(sink)
+    score = edges * (dishes + 1)
 
-    print(dishes)
-    return edges * (dishes + 1)
+    return Dirtiness(score, edges, dishes)
 
 
 def count_dishes(sink):
