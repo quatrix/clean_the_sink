@@ -17,8 +17,10 @@ class DirtySinkHandler(tornado.web.RequestHandler):
         file_body = self.request.files['sink'][0]['body']
         img = Image.open(StringIO.StringIO(file_body))
         dest = "/var/www/html/edisdead.com/sink.jpg"
+        out = "/var/www/html/edisdead.com/cv_sink.jpg"
+
         img.save(dest)
-        dirtiness = get_dirtiness(dest)
+        dirtiness = get_dirtiness(dest, out)
         logging.info('dirtiness: %r' ,dirtiness)
 
         statsd_client.gauge('sink.score', dirtiness.score)

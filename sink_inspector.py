@@ -9,6 +9,7 @@ from skimage import exposure
 from skimage.draw import circle_perimeter
 from skimage import color
 import math
+import sys
 
 from skimage.transform import hough_circle
 import numpy as np
@@ -25,7 +26,7 @@ def distance(x1, x2, y1, y2):
     )
 
 
-def count_dishes(sink):
+def count_dishes(out, sink):
     edges = canny(
         sink,
         sigma=2,
@@ -78,7 +79,7 @@ def count_dishes(sink):
         except IndexError:
             continue
 
-    draw_res(sink, edges)
+    draw_res(out, sink, edges)
     return len(dishes)
 
 
@@ -87,12 +88,12 @@ def count_edges(sink):
     return sum([int(i) for i in chain(*edges)])
 
 
-def get_dirtiness(f):
+def get_dirtiness(f, out=None):
     sink = get_sink(f)
     sink = sink[60:450, 180:440]
     sink = adjust_brightness(sink)
 
-    dishes = count_dishes(sink)
+    dishes = count_dishes(out, sink)
     edges = count_edges(sink)
     score = edges * (dishes + 1)
 
@@ -129,5 +130,5 @@ if __name__ == '__main__':
 
     for sink in sinks:
         f = 'tests/sample_files/' + sink + '.jpg'
-        d = get_dirtiness(f)
+        d = get_dirtiness(f, sys.argv[1])
         print('{}: {}'.format(sink, d))

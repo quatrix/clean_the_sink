@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
-import sys
 
-def draw_res(*fs):
-    if len(sys.argv) == 1:
+def draw_res(out, *fs):
+    if out is None:
         return
 
     fig, axs = plt.subplots(nrows=1,
@@ -17,4 +16,4 @@ def draw_res(*fs):
         ax.imshow(f, cmap=plt.cm.gray)
 
     fig.tight_layout()
-    plt.savefig(sys.argv[1])
+    plt.savefig(out)
