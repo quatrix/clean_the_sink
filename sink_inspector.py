@@ -101,7 +101,7 @@ def get_dirtiness(f):
 
 def adjust_brightness(sink):
     nsink = sink.copy()
-    pmin, pmax = np.percentile(nsink, (2, 98))
+    pmin, pmax = np.percentile(nsink, (3, 98))
 
     nsink = exposure.rescale_intensity(
         nsink,
@@ -124,6 +124,7 @@ def get_sink(f):
 if __name__ == '__main__':
     sinks = [
         "4d_2g_dl_0",
+        "4d_2g_ll_0",
     ]
 
     for sink in sinks:

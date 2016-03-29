@@ -4,34 +4,17 @@ from pprint import pprint
 from sink_inspector import *
 
 incrementaly_dirty_dl = [
-    "one_glass_dl",
-    "2d_dl",
-    "3d_dl",
-    "4d_dl",
-    "lots_dl",
 ]
 
 incrementaly_dirty_ll = [
-    "one_glass_ll",
-    "half_dirty_partially_dark",
 ]
 
 dirty_sinks = [
-    "half_dirty",
-    "washing_dishes",
-    "watering_plants",
-    "2d_2g_dl_0",
-    "2d_2g_dl_1",
-    "2d_2g_dl_2",
-    "2d_2g_dl_3",
-    "2d_2g_dl_4",
+    "4d_2g_dl_0",
+    "4d_2g_ll_0",
 ] + incrementaly_dirty_dl + incrementaly_dirty_ll
 
 clean_sinks = [
-    "clean_dl",
-    "clean_ll",
-    "clean2_ll",
-    "clean2_dl",
 ]
 
 
@@ -76,27 +59,9 @@ def test_incremental_dirtiness(results, pair):
 
     assert results[pair[0]].score < results[pair[1]].score, e
 
-
-sink_holes = [
-    (87, 74, 11),
-    (86, 76, 12),
-    (86, 76, 13),
-    (84, 78, 12),
-    (84, 75, 12),
-    (87, 80, 13),
-    (83, 79, 8),
-    (82, 80, 7),
-    (84, 85, 12),
-    (87, 74, 14),
-    (88, 73, 15),
-]
-
-@pytest.mark.parametrize("sink_hole", sink_holes)
-def test_is_sink_hole(sink_hole):
-    assert is_sink_hole(*sink_hole)
-
 sink_to_dishes = [
-    ("4d_2g_dl_0", 5)
+    ("4d_2g_dl_0", 5),
+    ("4d_2g_ll_0", 5),
 ]
 
 @pytest.mark.parametrize("expected", sink_to_dishes)
