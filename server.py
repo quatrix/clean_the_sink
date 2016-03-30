@@ -3,6 +3,7 @@ import tornado.web
 import StringIO
 import sys
 import statsd
+import datetime
 import logging
 
 from sink_inspector import get_dirtiness
@@ -18,8 +19,13 @@ class DirtySinkHandler(tornado.web.RequestHandler):
         img = Image.open(StringIO.StringIO(file_body))
         dest = "/var/www/html/edisdead.com/sink.jpg"
         out = "/var/www/html/edisdead.com/cv_sink.jpg"
+        archived = "/var/www/html/edisdead.com/archive/{}.jpg"
 
         img.save(dest)
+        img.save(archived.format(
+            datetime.datetime.now().strftime('%y_%m_%d_%H:%M')
+        ))
+
         dirtiness = get_dirtiness(dest, out)
         logging.info('dirtiness: %r' ,dirtiness)
 
