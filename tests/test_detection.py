@@ -2,7 +2,11 @@ import pytest
 from itertools import tee, izip
 from pprint import pprint
 from sink_inspector import *
+import os
 
+
+
+"""
 incrementaly_dirty_dl = [
 ]
 
@@ -19,7 +23,6 @@ clean_sinks = [
 
 
 def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
     return izip(a, b)
@@ -31,7 +34,7 @@ def get_full_path(f):
 def results():
     return {
         f: get_dirtiness(get_full_path(f))
-        for f in clean_sinks + dirty_sinks
+        for f in sink_4d_2g
     } 
 
 
@@ -68,3 +71,24 @@ sink_to_dishes = [
 def test_expected_number_of_dishes(results, expected):
     sink, dishes = expected
     assert results[sink].dishes == dishes, sink
+"""
+
+def listdir(d, expected):
+    files = [
+        os.path.join(d, f) for f in os.listdir(d)
+        if f.endswith('.jpg')
+    ]
+
+    return [(f, expected) for f in files]
+
+sink_4d_2g = listdir('tests/sample_files/4d_2g/', 5)
+sink_1d = listdir('tests/sample_files/1d/', 1)
+sink_1d_1g = listdir('tests/sample_files/1d_1g/', 2)
+
+sinks = sink_1d + sink_1d_1g + sink_4d_2g
+
+@pytest.mark.parametrize("sink", sinks)
+def test_expected_number_of_dishes(sink):
+    f, expected = sink
+    assert get_dirtiness(f).dishes == expected
+
