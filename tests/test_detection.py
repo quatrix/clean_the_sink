@@ -87,7 +87,8 @@ sink_1d_1g = listdir('tests/sample_files/1d_1g/', 2)
 sink_2d_1g = listdir('tests/sample_files/2d_1g/', 3)
 
 #sinks = sink_1d + sink_1d_1g + sink_4d_2g + sink_2d_1g
-sinks = sink_1d_1g
+#sinks = sink_1d_1g
+sinks = sink_2d_1g
 #sinks = sink_4d_2g
 #sinks = sink_1d + sink_1d_1g + sink_2d_1g
 
