@@ -38,7 +38,12 @@ def is_sink_hole(x, y, r):
 
 
 def count_dishes(out, sink):
-    edges = canny(sink, sigma=6)
+    edges = canny(
+        sink,
+        sigma=2,
+        #low_threshold=10,
+        high_threshold=0.3
+    )
     
     hough_radii = np.arange(25, 70, 1)
     hough_res = hough_circle(edges, hough_radii)
@@ -56,7 +61,7 @@ def count_dishes(out, sink):
     sink = color.gray2rgb(sink)
     hits = {}
 
-    for idx in np.argsort(accums)[::-1][:10]:
+    for idx in np.argsort(accums)[::-1][:25]:
         center_x, center_y = centers[idx]
         radius = radii[idx]
 
@@ -104,12 +109,11 @@ def adjust_brightness_gamma_log(sink):
 def get_dirtiness(f, out=None):
     sink = get_sink(f)
     sink = sink[60:450, 180:440]
-    sink = adjust_brightness(sink)
-    #sink = adjust_brightness_gamma_log(sink)
+    #sink = adjust_brightness(sink)
+    sink = adjust_brightness_gamma_log(sink)
 
     dishes = count_dishes(out, sink)
-    #edges = count_edges(sink)
-    edges = 1
+    edges = count_edges(sink)
     score = edges * (dishes + 1)
 
     return Dirtiness(score, edges, dishes)
@@ -142,10 +146,14 @@ if __name__ == '__main__':
         #'tests/sample_files/1d/16_03_31_18:53.jpg',
         #'tests/sample_files/4d_2g/16_03_31_15:33.jpg',
         #'tests/sample_files/4d_2g/16_03_31_16:33.jpg',
-        #'tests/sample_files/4d_2g/16_03_31_16:43.jpg',
+        'tests/sample_files/4d_2g/16_03_31_16:43.jpg',
         #'tests/sample_files/1d_1g/16_04_01_12:14.jpg',
         #'tests/sample_files/1d_1g/16_04_01_04:04.jpg'
-        'tests/sample_files/1d_1g/16_04_01_03:04.jpg',
+        #'tests/sample_files/1d_1g/16_04_01_03:04.jpg',
+        #'tests/sample_files/2d_1g/16_04_01_21:25.jpg',
+        #'tests/sample_files/1d_1g/16_04_01_06:44.jpg',
+        #'tests/sample_files/1d_1g/16_04_01_03:24.jpg',
+        #'tests/sample_files/1d_1g/16_04_01_03:14.jpg',
     ]
 
     for sink in sinks:

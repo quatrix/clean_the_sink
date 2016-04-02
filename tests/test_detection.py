@@ -84,8 +84,12 @@ def listdir(d, expected):
 sink_4d_2g = listdir('tests/sample_files/4d_2g/', 5)
 sink_1d = listdir('tests/sample_files/1d/', 1)
 sink_1d_1g = listdir('tests/sample_files/1d_1g/', 2)
+sink_2d_1g = listdir('tests/sample_files/2d_1g/', 3)
 
-sinks = sink_1d + sink_1d_1g + sink_4d_2g
+#sinks = sink_1d + sink_1d_1g + sink_4d_2g + sink_2d_1g
+sinks = sink_1d_1g
+#sinks = sink_4d_2g
+#sinks = sink_1d + sink_1d_1g + sink_2d_1g
 
 @pytest.mark.parametrize("sink", sinks)
 def test_expected_number_of_dishes(sink):
